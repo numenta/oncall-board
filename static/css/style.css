@@ -1,0 +1,17 @@
+body {
+    margin: 20px 30px;
+    font-size: 18pt;
+}
+
+table td, table th {
+    width: 100%;
+}
+
+table td {
+    padding: 6px;
+}
+
+table th {
+    text-align: center;
+    font-size: x-large;
+}

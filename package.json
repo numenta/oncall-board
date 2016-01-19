@@ -1,0 +1,21 @@
+{
+  "name": "numenta-oncall-board",
+  "version": "1.0.0",
+  "description": "For monitoring status of Numenta software builds.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "appveyor-js-client": "0.0.3",
+    "async": "^1.5.2",
+    "express": "^4.13.3",
+    "github": "^0.2.4",
+    "handlebars": "^4.0.5",
+    "lodash": "^4.0.0",
+    "request": "^2.67.0"
+  }
+}
