@@ -11,6 +11,8 @@ You must have the following environment variables set:
 
     JIRA_USERNAME
     JIRA_PASSWORD
+    JENKINS_USERNAME
+    JENKINS_PASSWORD
     APPVEYOR_API_TOKEN
     GH_USERNAME
     GH_PASSWORD
