@@ -55,17 +55,17 @@ function stateToStatus(state) {
         case 'passed':
         case 'success':
         case 'blue':
+        case 'blue_anime':
         case 'up':
         case 'identical':
-        case '0 issues':
             return 'success';
         case 'started':
         case 'running':
         case 'queued':
             return 'info';
         case 'warning':
-        case '1 issues':
-        case '2 issues':
+        case 'yellow':
+        case 'yellow_anime':
             return 'warning';
         default:
             return 'danger';
