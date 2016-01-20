@@ -25,7 +25,7 @@ var jenkinsJobs = undefined;
 var JIRA_USER = process.env.JIRA_USERNAME;
 var JIRA_PASS = process.env.JIRA_PASSWORD;
 var JQL = 'status in (New, "In Progress", Reopened, Blocked, "Selected for Development", "Ready for Development", "In Review") AND priority in ("P1 - Critical", "P2 - Blocker")';
-var JIRA_URL = 'https://' + JIRA_USER + ':' + JIRA_PASS + '@jira.numenta.com/rest/api/2/search?jql=' + JQL;
+var JIRA_URL = encodeURI('https://' + JIRA_USER + ':' + JIRA_PASS + '@jira.numenta.com/rest/api/2/search?jql=' + JQL);
 
 var categories = {
     NUPIC: 'NuPIC',
