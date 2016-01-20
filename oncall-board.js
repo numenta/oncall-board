@@ -34,15 +34,26 @@ var categories = {
 };
 
 function stateToStatus(state) {
+    var numIssues;
+    if (_.endsWith(state, 'issues')) {
+        numIssues = parseInt(state.split(/\s+/).shift());
+        if (numIssues > 5) {
+            return 'danger';
+        } else {
+            return 'warning';
+        }
+    }
     switch(state) {
         case 'passed':
         case 'success':
         case 'blue':
         case 'up':
+        case 'identical':
         case '0 issues':
             return 'success';
         case 'started':
         case 'running':
+        case 'queued':
             return 'info';
         case 'warning':
         case '1 issues':
@@ -51,6 +62,15 @@ function stateToStatus(state) {
         default:
             return 'danger';
     }
+}
+
+function aheadByToStatus(aheadBy) {
+    if (aheadBy > 10) {
+        return 'danger';
+    } else if (aheadBy > 5) {
+        return 'warning';
+    }
+    return 'success';
 }
 
 function getLastTravisMasterBuildState(slug, callback) {
@@ -186,7 +206,7 @@ statusFetchers.push(function(callback) {
             description = 'ahead by ' + comparison.ahead_by;
         }
         status.description = description;
-        status.status = stateToStatus(comparison.status);
+        status.status = aheadByToStatus(comparison.ahead_by);
         callback(null, status);
     });
 });
@@ -210,7 +230,10 @@ _.each({
         };
         getJenkinsJob(jobName, function(err, job) {
             if (err) { return callback(err); }
-            status.description = job.color;
+
+            // red_anime.gif
+            status.description = '<img src="/static/img/jenkins/' + job.color + '.gif"/>';
+
             status.status = stateToStatus(job.color);
             status.link = job.url;
             callback(null, status);
@@ -257,7 +280,6 @@ statusFetchers.push(function(callback) {
 });
 
 function requestHander(req, res) {
-    console.log('handling request');
     async.parallel(statusFetchers, function(err, reports) {
         if (err) throw err;
         reports = sortReportsByCategory(reports);
