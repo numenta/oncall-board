@@ -130,10 +130,8 @@ function findTargetJenkinsJob(name, callback) {
 
 function getJenkinsJob(name, callback) {
     if (! jenkinsJobs) {
-        console.log(JENKINS_URL);
         request.get(JENKINS_URL, function(err, response) {
             if (err) { return callback(err); }
-            console.log(response.body);
             jenkinsJobs = JSON.parse(response.body).jobs;
             findTargetJenkinsJob(name, callback);
         });
