@@ -30,34 +30,37 @@
 
     {{#each reports}}
         <div class="col-md-{{../columnWidth}}">
-        <table>
-            <thead>
-                <tr>
-                    <th colspan="2">
-                       {{@key}}
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-            {{#each this}}
-                <tr>
-                    <td>{{name}}</td>
-                    <td class="bg-{{status}}">
-                        {{#if link}}
-                        <a target="_blank" href="{{link}}">
-                            {{/if}}
 
-                            {{{description}}}
 
-                            {{#if link}}
-                        </a>
-                        {{/if}}
-                    </td>
-                </tr>
-            {{/each}}
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h2 class="panel-title">{{@key}}</h2>
+                </div>
+                <div class="panel-body">
+                    <table>
+                        <tbody>
+                        {{#each this}}
+                        <tr>
+                            <td>{{name}}</td>
+                            <td class="bg-{{status}}">
+                                {{#if link}}
+                                <a target="_blank" href="{{link}}">
+                                    {{/if}}
 
-            </tbody>
-        </table>
+                                    {{{description}}}
+
+                                    {{#if link}}
+                                </a>
+                                {{/if}}
+                            </td>
+                        </tr>
+                        {{/each}}
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
 
     {{/each}}
