@@ -130,8 +130,10 @@ function findTargetJenkinsJob(name, callback) {
 
 function getJenkinsJob(name, callback) {
     if (! jenkinsJobs) {
+        console.log(JENKINS_URL);
         request.get(JENKINS_URL, function(err, response) {
             if (err) { return callback(err); }
+            console.log(response.body);
             jenkinsJobs = JSON.parse(response.body).jobs;
             findTargetJenkinsJob(name, callback);
         });
@@ -220,34 +222,34 @@ statusFetchers.push(function(callback) {
 });
 
 
-//// Adds status fetchers for each Jenkins job we want to monitor.
-//_.each({
-//    'htm-it-mobile-product-pipeline': 'HTM for IT Mobile Product Pipeline',
-//    'htm-it-product-pipeline': 'HTM for IT Product Pipeline',
-//    'infrastructure-python-pipeline': 'Infrastructure Python Pipeline',
-//    'nupic-product-pipeline': 'NuPIC Product Pipeline',
-//    'product-master-build': 'Product Master Build',
-//    'refresh-taurus-servers': 'Refresh Taurus Servers',
-//    'taurus-mobile-product-pipeline': 'Taurus Mobile Product Pipeline',
-//    'terminate-stale-EC2-instances': 'Terminate Stale EC2 Instances'
-//}, function(title, jobName) {
-//    statusFetchers.push(function(callback) {
-//        var status = {
-//            name: title,
-//            category: categories.NUMENTA
-//        };
-//        getJenkinsJob(jobName, function(err, job) {
-//            if (err) { return callback(err); }
-//
-//            // red_anime.gif
-//            status.description = '<img src="/static/img/jenkins/' + job.color + '.gif"/>';
-//
-//            status.status = stateToStatus(job.color);
-//            status.link = job.url;
-//            callback(null, status);
-//        });
-//    });
-//});
+// Adds status fetchers for each Jenkins job we want to monitor.
+_.each({
+    'htm-it-mobile-product-pipeline': 'HTM for IT Mobile Product Pipeline',
+    'htm-it-product-pipeline': 'HTM for IT Product Pipeline',
+    'infrastructure-python-pipeline': 'Infrastructure Python Pipeline',
+    'nupic-product-pipeline': 'NuPIC Product Pipeline',
+    'product-master-build': 'Product Master Build',
+    'refresh-taurus-servers': 'Refresh Taurus Servers',
+    'taurus-mobile-product-pipeline': 'Taurus Mobile Product Pipeline',
+    'terminate-stale-EC2-instances': 'Terminate Stale EC2 Instances'
+}, function(title, jobName) {
+    statusFetchers.push(function(callback) {
+        var status = {
+            name: title,
+            category: categories.NUMENTA
+        };
+        getJenkinsJob(jobName, function(err, job) {
+            if (err) { return callback(err); }
+
+            // red_anime.gif
+            status.description = '<img src="/static/img/jenkins/' + job.color + '.gif"/>';
+
+            status.status = stateToStatus(job.color);
+            status.link = job.url;
+            callback(null, status);
+        });
+    });
+});
 
 // URLs we want to monitor.
 _.each([
