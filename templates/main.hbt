@@ -22,8 +22,9 @@
 </head>
 <body>
 
-<h1>{{title}}</h1>
-
+<div class="page-header">
+    <h1>{{title}}</h1>
+</div>
 <div class="container container-fluid">
 
     <div class="row">
