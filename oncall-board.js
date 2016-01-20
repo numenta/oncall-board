@@ -263,21 +263,21 @@ _.each([
     });
 });
 
-// High priority JIRA issues.
-statusFetchers.push(function(callback) {
-    var status = {
-        name: 'P1/P2 JIRA Issues',
-        link: 'https://jira.numenta.com/secure/RapidBoard.jspa?rapidView=40&quickFilter=418',
-        category: categories.NUMENTA
-    };
-    request.get(JIRA_URL, function(err, response) {
-        if (err) { return callback(err); }
-        var totalIssues = JSON.parse(response.body).total;
-        status.description = totalIssues + ' issues';
-        status.status = stateToStatus(totalIssues + ' issues');
-        callback(null, status);
-    });
-});
+//// High priority JIRA issues.
+//statusFetchers.push(function(callback) {
+//    var status = {
+//        name: 'P1/P2 JIRA Issues',
+//        link: 'https://jira.numenta.com/secure/RapidBoard.jspa?rapidView=40&quickFilter=418',
+//        category: categories.NUMENTA
+//    };
+//    request.get(JIRA_URL, function(err, response) {
+//        if (err) { return callback(err); }
+//        var totalIssues = JSON.parse(response.body).total;
+//        status.description = totalIssues + ' issues';
+//        status.status = stateToStatus(totalIssues + ' issues');
+//        callback(null, status);
+//    });
+//});
 
 function requestHander(req, res) {
     async.parallel(statusFetchers, function(err, reports) {
