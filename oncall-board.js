@@ -278,8 +278,10 @@ statusFetchers.push(function(callback) {
         link: 'https://jira.numenta.com/secure/RapidBoard.jspa?rapidView=40&quickFilter=418',
         category: categories.NUMENTA
     };
+    console.log(JIRA_URL);
     request.get(JIRA_URL, function(err, response) {
         if (err) { return callback(err); }
+        console.log(response.body);
         var totalIssues = JSON.parse(response.body).total;
         status.description = totalIssues + ' issues';
         status.status = stateToStatus(totalIssues + ' issues');
