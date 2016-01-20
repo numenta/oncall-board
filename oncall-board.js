@@ -1,6 +1,7 @@
 var path = require('path');
 var fs = require('fs');
 var request = require('request');
+var proxyRequest = request;
 var async = require('async');
 var _ = require('lodash');
 var Handlebars = require('handlebars');
@@ -33,13 +34,12 @@ var categories = {
     PING: 'Ping'
 };
 
-// Set up FIXIE if it is enabled
-if (process.env.FIXIE_URL) {
-    console.log("Using FIXIE proxy at %s.", process.env.FIXIE_URL);
-    request = request.defaults({
-        'proxy': process.env.FIXIE_URL
-    })
-}
+// Set up FIXIE proxying. This is so we can call into AWS for Jenkins/JIRA APIs
+// through specific IP addresses set up by Fixie.
+console.log("Using FIXIE proxy at %s.", process.env.FIXIE_URL);
+proxyRequest = request.defaults({
+    'proxy': process.env.FIXIE_URL
+});
 
 function stateToStatus(state) {
     var numIssues;
@@ -130,7 +130,7 @@ function findTargetJenkinsJob(name, callback) {
 
 function getJenkinsJob(name, callback) {
     if (! jenkinsJobs) {
-        request.get(JENKINS_URL, function(err, response) {
+        proxyRequest.get(JENKINS_URL, function(err, response) {
             if (err) { return callback(err); }
             jenkinsJobs = JSON.parse(response.body).jobs;
             findTargetJenkinsJob(name, callback);
@@ -272,22 +272,25 @@ _.each([
 });
 
 // High priority JIRA issues.
-statusFetchers.push(function(callback) {
-    var status = {
-        name: 'P1/P2 JIRA Issues',
-        link: 'https://jira.numenta.com/secure/RapidBoard.jspa?rapidView=40&quickFilter=418',
-        category: categories.NUMENTA
-    };
-    console.log(JIRA_URL);
-    request.get(JIRA_URL, function(err, response) {
-        if (err) { return callback(err); }
-        console.log(response.body);
-        var totalIssues = JSON.parse(response.body).total;
-        status.description = totalIssues + ' issues';
-        status.status = stateToStatus(totalIssues + ' issues');
-        callback(null, status);
-    });
-});
+
+// TODO: fix this
+
+//statusFetchers.push(function(callback) {
+//    var status = {
+//        name: 'P1/P2 JIRA Issues',
+//        link: 'https://jira.numenta.com/secure/RapidBoard.jspa?rapidView=40&quickFilter=418',
+//        category: categories.NUMENTA
+//    };
+//    console.log(JIRA_URL);
+//    proxyRequest.get(JIRA_URL, function(err, response) {
+//        if (err) { return callback(err); }
+//        console.log(response.body);
+//        var totalIssues = JSON.parse(response.body).total;
+//        status.description = totalIssues + ' issues';
+//        status.status = stateToStatus(totalIssues + ' issues');
+//        callback(null, status);
+//    });
+//});
 
 function requestHander(req, res) {
     async.parallel(statusFetchers, function(err, reports) {
