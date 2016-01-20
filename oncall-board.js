@@ -33,6 +33,14 @@ var categories = {
     PING: 'Ping'
 };
 
+// Set up FIXIE if it is enabled
+if (process.env.FIXIE_URL) {
+    console.log("Using FIXIE proxy at %s.", process.env.FIXIE_URL);
+    request = request.defaults({
+        'proxy': process.env.FIXIE_URL
+    })
+}
+
 function stateToStatus(state) {
     var numIssues;
     if (_.endsWith(state, 'issues')) {
