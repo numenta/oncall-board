@@ -251,7 +251,10 @@ _.each({
 
 // URLs we want to monitor.
 _.each([
-    'http://numenta.com', 'http://numenta.org', 'http://data.numenta.org'
+    'http://numenta.com',
+    'http://numenta.org',
+    'http://data.numenta.org',
+    'http://tooling.numenta.org/status/'
 ], function(url) {
     statusFetchers.push(function(callback) {
         var status = {
