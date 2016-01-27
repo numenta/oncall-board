@@ -132,7 +132,11 @@ function getJenkinsJob(name, callback) {
     if (! jenkinsJobs) {
         proxyRequest.get(JENKINS_URL, function(err, response) {
             if (err) { return callback(err); }
-            jenkinsJobs = JSON.parse(response.body).jobs;
+            try {
+                jenkinsJobs = JSON.parse(response.body).jobs;
+            } catch (error) {
+                callback(error);
+            }
             findTargetJenkinsJob(name, callback);
         });
     } else {
