@@ -66,6 +66,7 @@ function stateToStatus(state) {
         case 'warning':
         case 'yellow':
         case 'yellow_anime':
+        case 'unknown':
             return 'warning';
         default:
             return 'danger';
@@ -169,6 +170,11 @@ _.each({
             category: categories.NUPIC
         };
         getLastTravisMasterBuildState(slug, function(err, state) {
+            if (err) {
+                status.status = stateToStatus('unknown');
+                status.description = 'unknown';
+                return callback(null, status);
+            }
             status.description = state;
             status.status = stateToStatus(state);
             callback(null, status);
@@ -190,7 +196,9 @@ _.each({
         };
         getAppVeyorProject(slug, function (err, project) {
             if (err) {
-                return callback(err);
+                status.status = stateToStatus('unknown');
+                status.description = 'unknown';
+                return callback(null, status);
             }
             project.getLastBuildBranch('master', function (err, response) {
                 if (err) {
@@ -212,7 +220,11 @@ statusFetchers.push(function(callback) {
         category: categories.NUPIC
     };
     getNupicCoreSyncState(function(err, comparison) {
-        if (err) { return callback(err); }
+        if (err) {
+            status.status = stateToStatus('unknown');
+            status.description = 'unknown';
+            return callback(null, status);
+        }
         var description = comparison.status;
         if (comparison.status == 'ahead') {
             description = 'ahead by ' + comparison.ahead_by;
@@ -241,8 +253,11 @@ _.each({
             category: categories.NUMENTA
         };
         getJenkinsJob(jobName, function(err, job) {
-            if (err) { return callback(err); }
-
+            if (err) {
+                status.status = stateToStatus('unknown');
+                status.description = 'unknown';
+                return callback(null, status);
+            }
             // red_anime.gif
             status.description = '<img src="/static/img/jenkins/' + job.color + '.gif"/>';
 
