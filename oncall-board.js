@@ -122,11 +122,7 @@ function findTargetJenkinsJob(name, callback) {
     var targetJob = _.find(jenkinsJobs, function(job) {
         return job.name == name;
     });
-    if (! targetJob) {
-        callback(new Error('No Jenkins job found matching "' + name + '"!'));
-    } else {
-        callback(null, targetJob);
-    }
+    callback(null, targetJob);
 }
 
 function getJenkinsJob(name, callback) {
