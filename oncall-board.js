@@ -249,7 +249,7 @@ _.each({
             category: categories.NUMENTA
         };
         getJenkinsJob(jobName, function(err, job) {
-            if (err) {
+            if (err || !job) {
                 status.status = stateToStatus('unknown');
                 status.description = 'unknown';
                 return callback(null, status);
