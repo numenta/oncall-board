@@ -62,6 +62,7 @@ function stateToStatus(state) {
         case 'started':
         case 'running':
         case 'queued':
+        case 'created':
             return 'info';
         case 'warning':
         case 'yellow':
