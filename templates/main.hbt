@@ -69,6 +69,10 @@
 
     </div>
 
+    <p>GrokStream Web Charts</p>
+    <div class="col-md-12">
+        <iframe width="1020" height="480" style="border:0" src="http://numentainc-46.grokstream.com/grok/embed/charts?hash=76c54a288b51ccd361d736a8f9b1befc309864ff&width=1020&height=480"></iframe>
+    </div>
     <p>To get this working, you'll need to accept the insecure private https certificate warning page in your Browser Dev Tools for the widget. In Chrome browser, access Developer Tools, click on the error icon in the Developer Tools status bar, then right-click on the widget's URL there and select to load the URL in a separate tab; once in the new tab, click on Advanced, and accept the warning; then coe back and reload this page.</p>
     <div class="col-md-12">
         <iframe width="720" height="480" style="border:0" src="http://1.6.1.numenta.com/grok/embed/charts?hash=4473d99acb2dfcef8b871384f492604c27f86add&width=720&height=480"></iframe>
