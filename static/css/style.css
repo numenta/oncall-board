@@ -14,3 +14,9 @@ table th {
     text-align: center;
     font-size: x-large;
 }
+
+.bootstrap-switch {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}

@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <meta http-equiv="refresh" content="300" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
@@ -10,6 +9,7 @@
 
     <!-- Bootstrap -->
     <link href="/static/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="/static/css/bootstrap-switch.min.css" rel="stylesheet"/>
 
     <!-- Custom CSS -->
     <link href="/static/css/style.css" rel="stylesheet"/>
@@ -23,9 +23,12 @@
 </head>
 <body>
 
+<input type="checkbox" id="auto-refresh" checked>
+
 <div class="page-header">
     <h1>{{title}}</h1>
 </div>
+
 <div class="container container-fluid">
 
     <div class="row">
@@ -80,5 +83,32 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="/static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="/static/js/bootstrap-switch.min.js"></script>
+
+<script>
+    $(function() {
+        var $switch = $('#auto-refresh');
+        var refreshTime = 5 * 1000;
+        var refreshHandle = setTimeout(function() {
+            window.location.reload(false);
+        }, refreshTime);
+        $switch.bootstrapSwitch({
+            labelText: 'Auto Refresh',
+            labelWidth: 100
+        });
+        $switch.on('switchChange.bootstrapSwitch', function(event, state) {
+            if (state) {
+                if (! refreshHandle) {
+                    refreshHandle = setTimeout(function() {
+                        window.location.reload(false);
+                    }, refreshTime);
+                }
+            } else {
+                window.clearTimeout(refreshHandle);
+                refreshHandle = undefined;
+            }
+        });
+    });
+</script>
 </body>
 </html>
