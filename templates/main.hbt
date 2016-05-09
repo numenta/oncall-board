@@ -88,7 +88,8 @@
 <script>
     $(function() {
         var $switch = $('#auto-refresh');
-        var refreshTime = 5 * 1000;
+        // Refresh every five minutes.
+        var refreshTime = 5 * 1000 * 300;
         var refreshHandle = setTimeout(function() {
             window.location.reload(false);
         }, refreshTime);
