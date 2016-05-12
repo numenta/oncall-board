@@ -240,8 +240,6 @@ _.each({
     'infrastructure-python-pipeline': 'Infrastructure Python Pipeline',
     'nupic-product-pipeline': 'NuPIC Product Pipeline',
     'product-master-build': 'Product Master Build',
-    'refresh-taurus-servers': 'Refresh Taurus Servers',
-    'taurus-mobile-product-pipeline': 'Taurus Mobile Product Pipeline',
     'terminate-stale-EC2-instances': 'Terminate Stale EC2 Instances'
 }, function(title, jobName) {
     statusFetchers.push(function(callback) {
