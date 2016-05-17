@@ -23,14 +23,18 @@ var JENKINS_PASS = process.env.JENKINS_PASSWORD;
 var JENKINS_URL = 'http://' + JENKINS_USER + ':' + JENKINS_PASS + '@jenkins-master.numenta.com/api/json';
 var jenkinsJobs = undefined;
 
+var BAMBOO_URL = encodeURI('https://ci.numenta.com/rest/api/latest/result.json');
+var bambooJobs = undefined;
+
 var JIRA_USER = process.env.JIRA_USERNAME;
 var JIRA_PASS = process.env.JIRA_PASSWORD;
 var JQL = 'status in (New, "In Progress", Reopened, Blocked, "Selected for Development", "Ready for Development", "In Review") AND priority in ("P1 - Critical", "P2 - Blocker")';
 var JIRA_URL = encodeURI('http://' + JIRA_USER + ':' + JIRA_PASS + '@jira.numenta.com/rest/api/2/search?jql=' + JQL);
 
 var categories = {
-    NUPIC: 'NuPIC',
-    NUMENTA: 'Numenta',
+    OS: 'Core OS Pipelines',
+    JENKINS: 'Jenkins',
+    BAMBOO: 'Bamboo',
     PING: 'Ping'
 };
 
@@ -58,6 +62,7 @@ function stateToStatus(state) {
         case 'blue_anime':
         case 'up':
         case 'identical':
+        case 'Successful':
             return 'success';
         case 'started':
         case 'running':
@@ -126,6 +131,13 @@ function findTargetJenkinsJob(name, callback) {
     callback(null, targetJob);
 }
 
+function findTargetBambooJob(name, callback) {
+    var targetJob = _.find(bambooJobs, function(job) {
+        return job.plan.key == name;
+    });
+    callback(null, targetJob);
+}
+
 function getJenkinsJob(name, callback) {
     if (! jenkinsJobs) {
         proxyRequest.get(JENKINS_URL, function(err, response) {
@@ -139,6 +151,22 @@ function getJenkinsJob(name, callback) {
         });
     } else {
         findTargetJenkinsJob(name, callback);
+    }
+}
+
+function getBambooJob(name, callback) {
+    if (! bambooJobs) {
+        proxyRequest.get(BAMBOO_URL, function(err, response) {
+            if (err) return callback(err);
+            try {
+                bambooJobs = JSON.parse(response.body).results.result;
+            } catch(error) {
+                callback(error);
+            }
+            findTargetBambooJob(name, callback);
+        });
+    } else {
+        findTargetBambooJob(name, callback);
     }
 }
 
@@ -164,7 +192,7 @@ _.each({
         var status = {
             name: title,
             link: 'https://travis-ci.org/' + slug,
-            category: categories.NUPIC
+            category: categories.OS
         };
         getLastTravisMasterBuildState(slug, function(err, state) {
             if (err) {
@@ -189,7 +217,7 @@ _.each({
         var status = {
             name: title,
             link: 'https://ci.appveyor.com/project/numenta-ci/' + slug.split('/').pop() + '/history',
-            category: categories.NUPIC
+            category: categories.OS
         };
         getAppVeyorProject(slug, function (err, project) {
             if (err) {
@@ -214,7 +242,7 @@ statusFetchers.push(function(callback) {
     var status = {
         name: 'NuPIC Core Sync Status',
         link: 'http://status.numenta.org/monitor/core_sha_diff',
-        category: categories.NUPIC
+        category: categories.OS
     };
     getNupicCoreSyncState(function(err, comparison) {
         if (err) {
@@ -245,7 +273,7 @@ _.each({
     statusFetchers.push(function(callback) {
         var status = {
             name: title,
-            category: categories.NUMENTA
+            category: categories.JENKINS
         };
         getJenkinsJob(jobName, function(err, job) {
             if (err || !job) {
@@ -258,6 +286,32 @@ _.each({
 
             status.status = stateToStatus(job.color);
             status.link = job.url;
+            callback(null, status);
+        });
+    });
+});
+
+// Adds status fetchers for each Bamboo job we want to monitor
+_.each({
+    'NUP-PY': 'NuPIC',
+    'NUP-CORE': 'NuPIC Core',
+    'TAUR-TAUR': 'Taurus',
+    'UN-UN': 'Unicorn'
+}, function(title, jobName) {
+    statusFetchers.push(function(callback) {
+        var status = {
+            name: title,
+            category: categories.BAMBOO
+        };
+        getBambooJob(jobName, function(err, job) {
+            if (err) {
+                status.status = stateToStatus('unknown');
+                status.description = 'unknown';
+                return callback(null, status);
+            }
+            status.description = job.state;
+            status.status = stateToStatus(job.state);
+            status.link = job.link.href;
             callback(null, status);
         });
     });
