@@ -296,6 +296,7 @@ _.each({
     'NUP-PY': 'NuPIC',
     'NUP-CORE': 'NuPIC Core',
     'TAUR-TAUR': 'Taurus',
+    'IMBU-IMBU': 'Imbu',
     'UN-UN': 'Unicorn'
 }, function(title, jobName) {
     statusFetchers.push(function(callback) {
