@@ -161,7 +161,7 @@ function getBambooJob(name, callback) {
             try {
                 bambooJobs = JSON.parse(response.body).results.result;
             } catch(error) {
-                callback(error);
+                return callback(error);
             }
             findTargetBambooJob(name, callback);
         });
