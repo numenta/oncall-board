@@ -266,7 +266,6 @@ _.each({
     'htm-it-mobile-product-pipeline': 'HTM for IT Mobile Product Pipeline',
     'htm-it-product-pipeline': 'HTM for IT Product Pipeline',
     'infrastructure-python-pipeline': 'Infrastructure Python Pipeline',
-    'nupic-product-pipeline': 'NuPIC Product Pipeline',
     'product-master-build': 'Product Master Build',
     'terminate-stale-EC2-instances': 'Terminate Stale EC2 Instances'
 }, function(title, jobName) {
