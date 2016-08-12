@@ -18,11 +18,6 @@ var statusFetchers = [];
 var appveyor = new AppVeyor('numenta');
 var appveyorProjects = undefined;
 
-var JENKINS_USER = process.env.JENKINS_USERNAME;
-var JENKINS_PASS = process.env.JENKINS_PASSWORD;
-var JENKINS_URL = 'http://' + JENKINS_USER + ':' + JENKINS_PASS + '@jenkins-master.numenta.com/api/json';
-var jenkinsJobs = undefined;
-
 var BAMBOO_URL = encodeURI('https://ci.numenta.com/rest/api/latest/result.json');
 var bambooJobs = undefined;
 
@@ -124,34 +119,11 @@ function getAppVeyorProject(slug, callback) {
     }
 }
 
-function findTargetJenkinsJob(name, callback) {
-    var targetJob = _.find(jenkinsJobs, function(job) {
-        return job.name == name;
-    });
-    callback(null, targetJob);
-}
-
 function findTargetBambooJob(name, callback) {
     var targetJob = _.find(bambooJobs, function(job) {
         return job.plan.key == name;
     });
     callback(null, targetJob);
-}
-
-function getJenkinsJob(name, callback) {
-    if (! jenkinsJobs) {
-        proxyRequest.get(JENKINS_URL, function(err, response) {
-            if (err) { return callback(err); }
-            try {
-                jenkinsJobs = JSON.parse(response.body).jobs;
-            } catch (error) {
-                callback(error);
-            }
-            findTargetJenkinsJob(name, callback);
-        });
-    } else {
-        findTargetJenkinsJob(name, callback);
-    }
 }
 
 function getBambooJob(name, callback) {
@@ -257,36 +229,6 @@ statusFetchers.push(function(callback) {
         status.description = description;
         status.status = aheadByToStatus(comparison.ahead_by);
         callback(null, status);
-    });
-});
-
-
-// Adds status fetchers for each Jenkins job we want to monitor.
-_.each({
-    'htm-it-mobile-product-pipeline': 'HTM for IT Mobile Product Pipeline',
-    'htm-it-product-pipeline': 'HTM for IT Product Pipeline',
-    'infrastructure-python-pipeline': 'Infrastructure Python Pipeline',
-    'product-master-build': 'Product Master Build',
-    'terminate-stale-EC2-instances': 'Terminate Stale EC2 Instances'
-}, function(title, jobName) {
-    statusFetchers.push(function(callback) {
-        var status = {
-            name: title,
-            category: categories.JENKINS
-        };
-        getJenkinsJob(jobName, function(err, job) {
-            if (err || !job) {
-                status.status = stateToStatus('unknown');
-                status.description = 'unknown';
-                return callback(null, status);
-            }
-            // red_anime.gif
-            status.description = '<img src="/static/img/jenkins/' + job.color + '.gif"/>';
-
-            status.status = stateToStatus(job.color);
-            status.link = job.url;
-            callback(null, status);
-        });
     });
 });
 
