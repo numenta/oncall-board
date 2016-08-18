@@ -12,5 +12,5 @@ var app = express()
     ;
 
 app.listen(port, function() {
-    console.log('Ready on port %s.', port);
+    console.log('Ready at http://localhost:%s.', port);
 });
