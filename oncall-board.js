@@ -263,7 +263,8 @@ _.each([
     'http://numenta.com',
     'http://numenta.org',
     'http://data.numenta.org',
-    'http://tooling.numenta.org/status/'
+    'http://tooling.numenta.org/status/',
+    'https://discourse.numenta.org/'
 ], function(url) {
     statusFetchers.push(function(callback) {
         var status = {
