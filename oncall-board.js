@@ -8,7 +8,6 @@ var Handlebars = require('handlebars');
 var GH_USERNAME = process.env.GH_USERNAME;
 var GH_PASSWORD = process.env.GH_PASSWORD;
 var AppVeyor = require('appveyor-js-client');
-var coreDiff = require('./core-diff')(GH_USERNAME, GH_PASSWORD);
 var mainTmpl = Handlebars.compile(
     fs.readFileSync(
         path.join(__dirname, 'templates/main.hbt')
@@ -21,10 +20,10 @@ var appveyorProjects = undefined;
 var BAMBOO_URL = encodeURI('https://ci.numenta.com/rest/api/latest/result.json');
 var bambooJobs = undefined;
 
-var JIRA_USER = process.env.JIRA_USERNAME;
-var JIRA_PASS = process.env.JIRA_PASSWORD;
-var JQL = 'status in (New, "In Progress", Reopened, Blocked, "Selected for Development", "Ready for Development", "In Review") AND priority in ("P1 - Critical", "P2 - Blocker")';
-var JIRA_URL = encodeURI('http://' + JIRA_USER + ':' + JIRA_PASS + '@jira.numenta.com/rest/api/2/search?jql=' + JQL);
+//var JIRA_USER = process.env.JIRA_USERNAME;
+//var JIRA_PASS = process.env.JIRA_PASSWORD;
+//var JQL = 'status in (New, "In Progress", Reopened, Blocked, "Selected for Development", "Ready for Development", "In Review") AND priority in ("P1 - Critical", "P2 - Blocker")';
+//var JIRA_URL = encodeURI('http://' + JIRA_USER + ':' + JIRA_PASS + '@jira.numenta.com/rest/api/2/search?jql=' + JQL);
 
 var categories = {
     OS: 'Core OS Pipelines',
@@ -74,34 +73,11 @@ function stateToStatus(state) {
     }
 }
 
-function aheadByToStatus(aheadBy) {
-    if (aheadBy > 10) {
-        return 'danger';
-    } else if (aheadBy > 5) {
-        return 'warning';
-    }
-    return 'success';
-}
-
 function getLastTravisMasterBuildState(slug, callback) {
     var url = 'https://api.travis-ci.org/repos/' + slug + '/branches/master';
     request.get(url, function(err, payload) {
         if (err) { return callback(err); }
         callback(null, JSON.parse(payload.body).branch.state);
-    });
-}
-
-function extractNupicCoreSha(moduleData) {
-    return moduleData.replace(/\s+/g, '')
-        .split('NUPIC_CORE_COMMITISH=\'')
-        .pop().split('\'').shift();
-}
-
-function getNupicCoreSyncState(callback) {
-    coreDiff.contents('nupic', '.nupic_modules', function(err, nupicModules) {
-        if (err) { return callback(err); }
-        var sha = extractNupicCoreSha(nupicModules);
-        coreDiff.compare('nupic.core', sha, 'HEAD', callback);
     });
 }
 
@@ -206,29 +182,6 @@ _.each({
                 callback(null, status);
             });
         });
-    });
-});
-
-// The NuPIC / NuPIC Core sync status.
-statusFetchers.push(function(callback) {
-    var status = {
-        name: 'NuPIC Core Sync Status',
-        link: 'http://status.numenta.org/monitor/core_sha_diff',
-        category: categories.OS
-    };
-    getNupicCoreSyncState(function(err, comparison) {
-        if (err) {
-            status.status = stateToStatus('unknown');
-            status.description = 'unknown';
-            return callback(null, status);
-        }
-        var description = comparison.status;
-        if (comparison.status == 'ahead') {
-            description = 'ahead by ' + comparison.ahead_by;
-        }
-        status.description = description;
-        status.status = aheadByToStatus(comparison.ahead_by);
-        callback(null, status);
     });
 });
 
