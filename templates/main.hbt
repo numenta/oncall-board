@@ -46,15 +46,15 @@
                         <tbody>
                         {{#each this}}
                         <tr>
-                            <td>{{name}}</td>
-                            <td class="bg-{{status}}">
+                            <th>{{name}}</th>
+                            <td class="status bg-{{status}}">
                                 {{#if link}}
                                 <a target="_blank" href="{{link}}">
-                                    {{/if}}
+                                {{/if}}
 
                                     {{{description}}}
 
-                                    {{#if link}}
+                                {{#if link}}
                                 </a>
                                 {{/if}}
                             </td>

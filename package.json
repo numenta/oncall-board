@@ -16,6 +16,6 @@
     "github": "^0.2.4",
     "handlebars": "^4.0.5",
     "lodash": "^4.0.0",
-    "request": "^2.67.0"
+    "request": "^2.75.0"
   }
 }
