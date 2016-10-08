@@ -1,5 +1,6 @@
 body {
     margin: 20px 30px;
+    font-family: Verdana, sans-serif;
 }
 
 table td, table th {
@@ -11,12 +12,45 @@ table td {
 }
 
 table th {
-    text-align: center;
+    text-align: right;
+    padding-right: 10px;
     font-size: x-large;
+}
+
+.panel-title {
+    font-size: 26pt;
 }
 
 .bootstrap-switch {
     position: absolute;
     top: 20px;
     right: 20px;
+}
+
+.status {
+    font-size: 14pt;
+    font-weight: bold;
+    min-width: 200px;
+    text-align: center;
+}
+
+.bg-success {
+    background-color: #dff0d8;
+    border: 1px solid green;
+}
+.bg-failure {
+    background-color: #f2dede;
+    border: 1px solid red;
+}
+.bg-error {
+    background-color: slategrey;
+    border: 1px solid #111;
+}
+.bg-pending {
+    background-color: #fcf8e3;
+    border: 1px solid orange;
+}
+.bg-unknown {
+    background-color: grey;
+    border: 1px solid #111;
 }
