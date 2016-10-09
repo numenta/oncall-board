@@ -117,6 +117,11 @@ function sortReportsByCategory(reports) {
         }
         out[category].push(report);
     });
+    _.each(_.keys(out), function(category) {
+        out[category] = _.sortBy(out[category], function(report) {
+            return report.name;
+        });
+    });
     return out;
 }
 
