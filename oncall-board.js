@@ -45,6 +45,7 @@ function stateToStatus(state) {
         case 'running':
         case 'queued':
         case 'created':
+        case 'Unknown':
             return 'pending';
         default:
             console.warn('Unknown state "%s"', state);
