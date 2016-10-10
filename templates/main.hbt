@@ -37,16 +37,16 @@
         <div class="col-md-{{../columnWidth}}">
 
 
-            <div class="panel panel-primary">
+            <div class="panel panel-{{status}}">
                 <div class="panel-heading">
                     <h2 class="panel-title">{{@key}}</h2>
                 </div>
                 <div class="panel-body">
                     <table>
                         <tbody>
-                        {{#each this}}
+                        {{#each builds}}
                         <tr>
-                            <th>{{name}}</th>
+                            <th>{{@key}}</th>
                             <td class="status bg-{{status}}">
                                 {{#if link}}
                                 <a target="_blank" href="{{link}}">

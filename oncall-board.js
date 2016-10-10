@@ -28,31 +28,6 @@ proxyRequest = request.defaults({
 // , 'TAUR-TAUR': 'Taurus (Bamboo)'
 // , 'UN-UN': 'Unicorn (Bamboo)'
 
-// Gets complete CI status from Nubot service.
-statusFetchers.push(function(callback) {
-    request.get(CI_STATUS_URL, function(err, response, body) {
-        if (err) return callback(err);
-        var statuses = []
-          , payload = JSON.parse(body)
-          ;
-        _.each(payload, function(builds, slug) {
-            _.each(builds, function(build, ciPlatform) {
-                var status = {}
-                  , platforms = CI_PLATS[ciPlatform].join(',')
-                  ;
-                status.name = platforms + ' (' + ciPlatform + ')';
-                status.status = build.status
-                status.description = build.state || build.status;
-                status.link = build.url;
-                status.category = slug;
-                statuses.push(status);
-            });
-        });
-        callback(null, statuses);
-    });
-});
-
-
 // URLs we want to monitor.
 //_.each([
 //    'http://numenta.com',
@@ -79,35 +54,48 @@ statusFetchers.push(function(callback) {
 //    });
 //});
 
-
-function sortReportsByCategory(reports) {
-    var out = {};
-    _.each(reports, function(report) {
-        var category = report.category;
-        if (! out[category]) {
-            out[category] = []
-        }
-        out[category].push(report);
-    });
-    _.each(_.keys(out), function(category) {
-        out[category] = _.sortBy(out[category], function(report) {
-            return report.name;
-        });
-    });
-    return out;
+function toBootStrapClass(status) {
+    switch(status) {
+        case 'success':
+            return 'success';
+        case 'pending':
+            return 'warning';
+        default:
+            return 'danger';
+    }
 }
 
 function requestHander(req, res) {
-    async.parallel(statusFetchers, function(err, reports) {
+
+    request.get(CI_STATUS_URL, function(err, response, body) {
         if (err) throw err;
-        reports = _.flatten(reports);
-        reports = sortReportsByCategory(reports);
+        var reports = []
+          , payload = JSON.parse(body)
+          ;
+
+        _.each(payload, function(buildStatus, slug) {
+            _.each(buildStatus.builds, function(build, ciPlatform) {
+                var status = {}
+                  , platforms
+                  ;
+                if (ciPlatform == 'status') return;
+                platforms = CI_PLATS[ciPlatform].join(',')
+                build.name = platforms + ' (' + ciPlatform + ')';
+                build.status = build.status
+                build.description = build.state || build.status;
+                build.link = build.url;
+            });
+            buildStatus.status = toBootStrapClass(buildStatus.status);
+        });
+
         res.end(mainTmpl({
             title: 'Numenta On-Call Status',
-            reports: reports,
-            columnWidth: 12 / _.size(reports)
+            reports: payload,
+            columnWidth: 12 / _.size(payload)
         }));
+
     });
+
 }
 
 module.exports = function() {
