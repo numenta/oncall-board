@@ -24,35 +24,6 @@ proxyRequest = request.defaults({
     'proxy': process.env.FIXIE_URL
 });
 
-function stateToStatus(state) {
-    switch(state) {
-        case 'success':
-        case 'passed':
-        case 'up':
-        case 'identical':
-        case 'Successful':
-            return 'success';
-        case 'failure':
-        case 'failed':
-        case 'Failed':
-            return 'failure';
-        case 'error':
-        case 'errored':
-        case 'err':
-            return 'error';
-        case 'pending':
-        case 'started':
-        case 'running':
-        case 'queued':
-        case 'created':
-        case 'Unknown':
-            return 'pending';
-        default:
-            console.warn('Unknown state "%s"', state);
-            return 'unknown';
-    }
-}
-
 // TODO: important
 // , 'TAUR-TAUR': 'Taurus (Bamboo)'
 // , 'UN-UN': 'Unicorn (Bamboo)'
@@ -70,8 +41,8 @@ statusFetchers.push(function(callback) {
                   , platforms = CI_PLATS[ciPlatform].join(',')
                   ;
                 status.name = platforms + ' (' + ciPlatform + ')';
-                status.status = stateToStatus(build.state);
-                status.description = build.state;
+                status.status = build.status
+                status.description = build.state || build.status;
                 status.link = build.url;
                 status.category = slug;
                 statuses.push(status);
