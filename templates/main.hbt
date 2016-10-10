@@ -46,7 +46,7 @@
                         <tbody>
                         {{#each builds}}
                         <tr>
-                            <th>{{@key}}</th>
+                            <th>{{name}}</th>
                             <td class="status bg-{{status}}">
                                 {{#if link}}
                                 <a target="_blank" href="{{link}}">

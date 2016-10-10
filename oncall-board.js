@@ -75,8 +75,7 @@ function requestHander(req, res) {
 
         _.each(payload, function(buildStatus, slug) {
             _.each(buildStatus.builds, function(build, ciPlatform) {
-                var status = {}
-                  , platforms
+                var platforms
                   ;
                 if (ciPlatform == 'status') return;
                 platforms = CI_PLATS[ciPlatform].join(',')
