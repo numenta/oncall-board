@@ -42,7 +42,7 @@ table th {
     border: 1px solid red;
 }
 .bg-error {
-    background-color: slategrey;
+    background-color: lightgrey;
     border: 1px solid #111;
 }
 .bg-pending {
@@ -52,4 +52,14 @@ table th {
 .bg-unknown {
     background-color: grey;
     border: 1px solid #111;
+}
+
+.panel-error {
+    border-color: black;
+}
+
+.panel-error>.panel-heading {
+    color: black;
+    background-color: lightgrey;
+    border-color: black;
 }

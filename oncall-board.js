@@ -11,6 +11,7 @@ var mainTmpl = Handlebars.compile(
 );
 var statusFetchers = [];
 var CI_STATUS_URL = 'http://nubot.numenta.org/hubot/ci-status';
+// var CI_STATUS_URL = 'http://localhost:8080/hubot/ci-status';
 var CI_PLATS = {
     'Bamboo': ['Linux']
   , 'TravisCI': ['OS X']
@@ -60,6 +61,8 @@ function toBootStrapClass(status) {
             return 'success';
         case 'pending':
             return 'warning';
+        case 'error':
+            return 'error';
         default:
             return 'danger';
     }
@@ -69,18 +72,15 @@ function requestHander(req, res) {
 
     request.get(CI_STATUS_URL, function(err, response, body) {
         if (err) throw err;
-        var reports = []
-          , payload = JSON.parse(body)
-          ;
+        var payload = JSON.parse(body);
 
         _.each(payload, function(buildStatus, slug) {
             _.each(buildStatus.builds, function(build, ciPlatform) {
                 var platforms
                   ;
                 if (ciPlatform == 'status') return;
-                platforms = CI_PLATS[ciPlatform].join(',')
+                platforms = CI_PLATS[ciPlatform].join(',');
                 build.name = platforms + ' (' + ciPlatform + ')';
-                build.status = build.status
                 build.description = build.state || build.status;
                 build.link = build.url;
             });
