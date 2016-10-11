@@ -29,13 +29,12 @@
     <h1>{{title}}</h1>
 </div>
 
-<div class="container container-fluid">
+<div class="container-fluid">
 
     <div class="row">
 
     {{#each reports}}
-        <div class="col-md-{{../columnWidth}}">
-
+        <div class="col-md-6">
 
             <div class="panel panel-{{status}}">
                 <div class="panel-heading">

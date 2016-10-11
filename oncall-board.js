@@ -89,8 +89,7 @@ function requestHander(req, res) {
 
         res.end(mainTmpl({
             title: 'Numenta On-Call Status',
-            reports: payload,
-            columnWidth: 12 / _.size(payload)
+            reports: payload
         }));
 
     });
