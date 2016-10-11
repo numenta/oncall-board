@@ -55,11 +55,11 @@ table th {
 }
 
 .panel-error {
-    border-color: black;
+    border-color: slategrey;
 }
 
 .panel-error>.panel-heading {
-    color: black;
+    color: #444;
     background-color: lightgrey;
-    border-color: black;
+    border-color: slategrey;
 }
