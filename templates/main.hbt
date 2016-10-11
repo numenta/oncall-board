@@ -38,7 +38,7 @@
 
             <div class="panel panel-{{status}}">
                 <div class="panel-heading">
-                    <h2 class="panel-title">{{@key}}</h2>
+                    <h2 class="panel-title">{{slug}}</h2>
                 </div>
                 <div class="panel-body">
                     <table>

@@ -72,9 +72,11 @@ function requestHander(req, res) {
 
     request.get(CI_STATUS_URL, function(err, response, body) {
         if (err) throw err;
-        var payload = JSON.parse(body);
+        var payload = JSON.parse(body)
+          , orderedReports = [];
 
         _.each(payload, function(buildStatus, slug) {
+            buildStatus.slug = slug;
             _.each(buildStatus.builds, function(build, ciPlatform) {
                 var platforms
                   ;
@@ -87,9 +89,14 @@ function requestHander(req, res) {
             buildStatus.status = toBootStrapClass(buildStatus.status);
         });
 
+        orderedReports.push(payload['numenta/nupic.core']);
+        orderedReports.push(payload['numenta/nupic']);
+        orderedReports.push(payload['numenta/nupic.regression']);
+        orderedReports.push(payload['numenta/numenta-apps/taurus']);
+
         res.end(mainTmpl({
             title: 'Numenta On-Call Status',
-            reports: payload
+            reports: orderedReports
         }));
 
     });
