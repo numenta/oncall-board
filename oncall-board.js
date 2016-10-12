@@ -25,10 +25,6 @@ proxyRequest = request.defaults({
     'proxy': process.env.FIXIE_URL
 });
 
-// TODO: important
-// , 'TAUR-TAUR': 'Taurus (Bamboo)'
-// , 'UN-UN': 'Unicorn (Bamboo)'
-
 // URLs we want to monitor.
 //_.each([
 //    'http://numenta.com',
@@ -68,13 +64,29 @@ function toBootStrapClass(status) {
     }
 }
 
+function errorResponse(err, res) {
+    res.end(mainTmpl({
+        title: 'ERROR getting status!',
+        reports: [{
+            slug: 'Error message',
+            builds: [{
+                name: err.message,
+                description: ''
+            }]
+        }]
+    }));
+}
+
 function requestHander(req, res) {
 
     request.get(CI_STATUS_URL, function(err, response, body) {
-        if (err) throw err;
-        var payload = JSON.parse(body)
-          , orderedReports = [];
+        var payload, orderedReports = [];
 
+        if (err) {
+            return errorResponse(err, res);
+        }
+
+        payload = JSON.parse(body)
         _.each(payload, function(buildStatus, slug) {
             buildStatus.slug = slug;
             _.each(buildStatus.builds, function(build, ciPlatform) {
