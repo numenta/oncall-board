@@ -94,7 +94,7 @@ function requestHander(req, res) {
                     if (ciPlatform == 'status') return;
                     platforms = CI_PLATS[ciPlatform].join(',');
                     build.name = platforms + ' (' + ciPlatform + ')';
-                    build.description = build.state || build.status;
+                    build.description = build.status;
                     build.link = build.url;
                 });
                 buildStatus.status = toBootStrapClass(buildStatus.status);
