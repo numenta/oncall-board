@@ -17,6 +17,7 @@ var CI_PLATS = {
   , 'TravisCI': ['OS X']
   , 'AppVeyor': ['Windows']
 };
+var HOST_URL = process.env.HOST_URL;
 
 // Set up FIXIE proxying. This is so we can call into AWS for Jenkins/JIRA APIs
 // through specific IP addresses set up by Fixie.
@@ -51,9 +52,9 @@ function errorResponse(err, res) {
     }));
 }
 
-function getOverallUrlStatus(urlReports) {
+function getOverallStatus(reports) {
     var status = 'success';
-    _.each(urlReports, function(report) {
+    _.each(reports, function(report) {
         if (report.status !== 'success') {
             status = toBootStrapClass(report.status);
         }
@@ -68,6 +69,19 @@ function urlReportsToBuildStructure(urlReports) {
         out[report.name] = report;
     });
     return out;
+}
+
+function getOpenGraphImage(status) {
+    return HOST_URL + '/static/img/' + status + '.png';
+}
+
+function getOpenGraphDescription(status) {
+    return {
+        'success': 'All Numenta services and pipelines are operational.'
+      , 'failure': 'There is a test failure or non-operational service.'
+      , 'error': 'Error running a service or pipeline job.'
+      , 'pending': 'Jobs are currently running, awaiting results.'
+    }[status];
 }
 
 function requestHander(req, res) {
@@ -140,7 +154,8 @@ function requestHander(req, res) {
         if (err) return errorResponse(err, res);
         var reports = results[0]
           , urlReports = results.slice(1)
-          , urlStatus = getOverallUrlStatus(urlReports)
+          , urlStatus = getOverallStatus(urlReports)
+          , overallStatus
           ;
 
         reports.push({
@@ -149,9 +164,14 @@ function requestHander(req, res) {
           , builds: urlReportsToBuildStructure(urlReports)
         });
 
+        overallStatus = getOverallStatus(reports);
+
         res.end(mainTmpl({
-            title: 'Numenta On-Call Status',
-            reports: reports
+            title: 'Numenta On-Call Status'
+          , url: HOST_URL
+          , imageUrl: getOpenGraphImage(overallStatus)
+          , description: getOpenGraphDescription(overallStatus)
+          , reports: reports
         }));
     });
 
