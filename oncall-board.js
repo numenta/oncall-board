@@ -111,7 +111,7 @@ function requestHander(req, res) {
                     build.name = platforms + ' (' + ciPlatform + ')';
                     build.description = build.state;
                     build.status = build.state;
-                    build.link = build.url;
+                    build.link = build.target_url;
                 });
                 buildStatus.status = toBootStrapClass(buildStatus.status);
             });
