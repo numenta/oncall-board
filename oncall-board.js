@@ -12,6 +12,7 @@ var mainTmpl = Handlebars.compile(
 var statusFetchers = [];
 var CI_STATUS_URL = 'http://nubot.numenta.org/hubot/ci-status';
 // var CI_STATUS_URL = 'http://localhost:8080/hubot/ci-status';
+var GH_URL = 'https://github.com/{ORG}/{REPO}/tree/{SHA}';
 var CI_PLATS = {
     'continuous-integration/bamboo': ['Linux']
   , 'continuous-integration/travis-ci/push': ['OS X']
@@ -84,6 +85,10 @@ function getOpenGraphDescription(status) {
     }[status];
 }
 
+function getGithubTreeUrl(slug, sha) {
+    return GH_URL.replace('{ORG}/{REPO}', slug).replace('{SHA}', sha);
+}
+
 function requestHander(req, res) {
     var fetchers = [];
 
@@ -102,17 +107,27 @@ function requestHander(req, res) {
 
             _.each(payload, function(buildStatus, slug) {
                 buildStatus.slug = slug;
-                _.each(buildStatus.builds, function(build, ciPlatform) {
-                    var platforms
-                      ;
-                    if (ciPlatform == 'status') return;
-                    platforms = CI_PLATS[ciPlatform].join(',');
-                    ciPlatform = ciPlatform.split('/')[1];
-                    build.name = platforms + ' (' + ciPlatform + ')';
-                    build.description = build.state;
-                    build.status = build.state;
-                    build.link = build.target_url;
-                });
+                if (buildStatus.status == 'unknown') {
+                    buildStatus.status = 'pending';
+                    buildStatus.builds['uknown'] = {
+                        name: 'no builds have run against master at this time',
+                        status: 'pending',
+                        description: 'pending',
+                        link: getGithubTreeUrl(slug, buildStatus.sha)
+                    };
+                } else {
+                    _.each(buildStatus.builds, function(build, ciPlatform) {
+                        var platforms
+                          ;
+                        if (ciPlatform == 'status') return;
+                        platforms = CI_PLATS[ciPlatform].join(',');
+                        ciPlatform = ciPlatform.split('/')[1];
+                        build.name = platforms + ' (' + ciPlatform + ')';
+                        build.description = build.state;
+                        build.status = build.state;
+                        build.link = build.target_url;
+                    });
+                }
                 buildStatus.status = toBootStrapClass(buildStatus.status);
             });
 
