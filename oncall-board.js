@@ -110,7 +110,7 @@ function requestHander(req, res) {
                 if (buildStatus.status == 'unknown') {
                     buildStatus.status = 'pending';
                     buildStatus.builds['uknown'] = {
-                        name: 'no builds have run against master at this time',
+                        name: 'awaiting next build...',
                         status: 'pending',
                         description: 'pending',
                         link: getGithubTreeUrl(slug, buildStatus.sha)
