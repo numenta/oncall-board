@@ -134,7 +134,7 @@ function requestHander(req, res) {
             orderedReports.push(payload['numenta/nupic.core']);
             orderedReports.push(payload['numenta/nupic']);
             orderedReports.push(payload['numenta/nupic.regression']);
-            orderedReports.push(payload['numenta/numenta-apps/taurus']);
+            orderedReports.push(payload['numenta/numenta-apps']);
             callback(null, orderedReports);
         });
     });
