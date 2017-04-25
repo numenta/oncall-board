@@ -35,8 +35,7 @@ table th {
     background-color: #dff0d8;
     border: 1px solid green;
 }
-.bg-failure {
-    background-color: #f2dede;
+.bg-danger {
     border: 1px solid red;
 }
 .bg-error {

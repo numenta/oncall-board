@@ -35,7 +35,7 @@ var BAMBOO_PLANS = {
 function toBootStrapClass(status) {
     switch(status) {
         case 'success':
-        case 'Finished':
+        case 'Successful':
             return 'success';
         case 'pending':
             return 'warning';
@@ -84,9 +84,9 @@ function processBambooPayload(payload, group) {
         title: payload.buildResultKey
       , name: payload.planName
       , link: BMB_HTML_URL + '/' + payload.buildResultKey
-      , rawStatus: payload.lifeCycleState
-      , status: toBootStrapClass(payload.lifeCycleState)
-      , description: payload.reasonSummary
+      , rawStatus: payload.state
+      , status: toBootStrapClass(payload.state)
+      , description: payload.reasonSummary + ' (' + payload.state + ')'
       , category: group
     };
 }
