@@ -9,27 +9,33 @@ var mainTmpl = Handlebars.compile(
         path.join(__dirname, 'templates/main.hbt')
     ).toString()
 );
-var statusFetchers = [];
-var CI_STATUS_URL = 'http://nubot.numenta.org/hubot/ci-status';
-// var CI_STATUS_URL = 'http://localhost:8080/hubot/ci-status';
-var GH_URL = 'https://github.com/{ORG}/{REPO}/tree/{SHA}';
-var CI_PLATS = {
-    'continuous-integration/bamboo': ['Linux']
-  , 'continuous-integration/travis-ci/push': ['OS X']
-  , 'continuous-integration/appveyor/branch': ['Windows']
-};
+
+// Users must set these environment variables.
 var HOST_URL = process.env.HOST_URL;
 
-// Set up FIXIE proxying. This is so we can call into AWS for Jenkins/JIRA APIs
-// through specific IP addresses set up by Fixie.
-console.log("Using FIXIE proxy at %s.", process.env.FIXIE_URL);
-proxyRequest = request.defaults({
-    'proxy': process.env.FIXIE_URL
-});
+var BMB_JSON_URL = 'https://ci.numenta.com/rest/api/latest/result';
+var BMB_HTML_URL = 'https://ci.numenta.com/browse';
+var BAMBOO_PLANS = {
+    'NuPIC Bamboo Jobs': [
+        'NUP-PY'
+      , 'NUP-CORE'
+      , 'NUP-REGR'
+    ]
+  , 'Doc Builds': [
+        'NUP-NUPDOCS'
+      , 'NUP-COREDOCS'
+  ]
+  , 'Application Builds': ['TAUR-TAUR']
+  , 'Web Builds': [
+      'WEB-COM'
+    , 'WEB-ORG'
+  ]
+};
 
 function toBootStrapClass(status) {
     switch(status) {
         case 'success':
+        case 'Finished':
             return 'success';
         case 'pending':
             return 'warning';
@@ -44,11 +50,8 @@ function errorResponse(err, res) {
     res.end(mainTmpl({
         title: 'ERROR getting status!',
         reports: [{
-            slug: 'Error message',
-            builds: [{
-                name: err.message,
-                description: ''
-            }]
+            slug: err.message,
+            builds: []
         }]
     }));
 }
@@ -61,15 +64,6 @@ function getOverallStatus(reports) {
         }
     });
     return status;
-}
-
-function urlReportsToBuildStructure(urlReports) {
-    var out = {};
-    _.each(urlReports, function (report) {
-        report.name = report.name.split('//').pop();
-        out[report.name] = report;
-    });
-    return out;
 }
 
 function getOpenGraphImage(status) {
@@ -85,57 +79,44 @@ function getOpenGraphDescription(status) {
     }[status];
 }
 
-function getGithubTreeUrl(slug, sha) {
-    return GH_URL.replace('{ORG}/{REPO}', slug).replace('{SHA}', sha);
+function processBambooPayload(payload, group) {
+    return {
+        title: payload.buildResultKey
+      , name: payload.planName
+      , link: BMB_HTML_URL + '/' + payload.buildResultKey
+      , rawStatus: payload.lifeCycleState
+      , status: toBootStrapClass(payload.lifeCycleState)
+      , description: payload.reasonSummary
+      , category: group
+    };
 }
 
 function requestHander(req, res) {
     var fetchers = [];
 
-    fetchers.push(function(callback) {
-        request.get(CI_STATUS_URL, function(err, response, body) {
-            if (err) return callback(err);
-
-            var payload, orderedReports = [];
-
-            try {
-                payload = JSON.parse(body)
-            } catch (parseError) {
-                console.log(body);
-                return errorResponse(parseError, res);
-            }
-
-            _.each(payload, function(buildStatus, slug) {
-                buildStatus.slug = slug;
-                if (buildStatus.status == 'unknown') {
-                    buildStatus.status = 'pending';
-                    buildStatus.builds['uknown'] = {
-                        name: 'awaiting next build...',
-                        status: 'pending',
-                        description: 'pending',
-                        link: getGithubTreeUrl(slug, buildStatus.sha)
-                    };
-                } else {
-                    _.each(buildStatus.builds, function(build, ciPlatform) {
-                        var platforms
-                          ;
-                        if (ciPlatform == 'status') return;
-                        platforms = CI_PLATS[ciPlatform].join(',');
-                        ciPlatform = ciPlatform.split('/')[1];
-                        build.name = platforms + ' (' + ciPlatform + ')';
-                        build.description = build.state;
-                        build.status = build.state;
-                        build.link = build.target_url;
-                    });
-                }
-                buildStatus.status = toBootStrapClass(buildStatus.status);
+    // Add all the bamboo plans we want to monitor.
+    _.each(BAMBOO_PLANS, function(plans, group) {
+        _.each(plans, function(planKey) {
+            var jsonUrl = BMB_JSON_URL + '/' + planKey + '/latest.json';
+            fetchers.push(function(callback) {
+                request.get(jsonUrl, function(err, response, body) {
+                    var payload = undefined;
+                    if (err || response.statusCode != 200) {
+                        return errorResponse(
+                            new Error(
+                                'Bad response (' + response.statusCode + ') from '
+                                + jsonUrl
+                            ), res
+                        );
+                    }
+                    try {
+                        payload = JSON.parse(body)
+                    } catch (parseError) {
+                        return errorResponse(parseError, res);
+                    }
+                    callback(null, processBambooPayload(payload, group));
+                });
             });
-
-            orderedReports.push(payload['numenta/nupic.core']);
-            orderedReports.push(payload['numenta/nupic']);
-            orderedReports.push(payload['numenta/nupic.regression']);
-            orderedReports.push(payload['numenta/numenta-apps/taurus']);
-            callback(null, orderedReports);
         });
     });
 
@@ -148,47 +129,55 @@ function requestHander(req, res) {
        'https://discourse.numenta.org/'
     ], function(url) {
        fetchers.push(function(callback) {
-           var status = {
-               name: url,
-               link: url
-           };
            request.get(url, function(err, response) {
-               var state = 'up';
+               var rawStatus = 'up';
+               var status = 'success';
                if (err || response.statusCode != 200) {
-                   state = 'down';
+                   rawStatus = 'down';
+                   if (response && response.statusCode) {
+                       rawStatus += ' (' + response.statusCode + ')';
+                   }
+                   status = 'failure';
                }
-               status.description = state;
-               status.status = 'failure';
-               if (state == 'up') {
-                   status.status = 'success';
-               }
-               callback(null, status);
+               callback(null, {
+                   title: url
+                 , link: url
+                 , description: rawStatus
+                 , rawStatus: rawStatus
+                 , status: status
+                 , category: 'URL Checks'
+               });
            });
        });
     });
 
-    async.parallel(fetchers, function(err, results) {
+    async.parallel(fetchers, function(err, statusReports) {
         if (err) return errorResponse(err, res);
-        var reports = results[0]
-          , urlReports = results.slice(1)
-          , urlStatus = getOverallStatus(urlReports)
-          , overallStatus
-          ;
+        var overallStatus = getOverallStatus(statusReports);
+        var groupedReports = {};
 
-        reports.push({
-            slug: 'Web Resources'
-          , status: urlStatus
-          , builds: urlReportsToBuildStructure(urlReports)
+        _.each(statusReports, function(report) {
+            var category = report.category;
+            if (! groupedReports[category]) {
+                groupedReports[category] = {
+                    category: category
+                  , reports: []
+                  , status: undefined
+                };
+            }
+            groupedReports[category].reports.push(report);
         });
 
-        overallStatus = getOverallStatus(reports);
+        _.each(groupedReports, function(report) {
+            report.status = getOverallStatus(report.reports)
+        });
 
         res.end(mainTmpl({
             title: 'Numenta On-Call Status'
           , url: HOST_URL
           , imageUrl: getOpenGraphImage(overallStatus)
           , description: getOpenGraphDescription(overallStatus)
-          , reports: reports
+          , reports: groupedReports
         }));
     });
 
