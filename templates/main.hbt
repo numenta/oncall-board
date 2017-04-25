@@ -46,24 +46,28 @@
 
             <div class="panel panel-{{status}}">
                 <div class="panel-heading">
-                    <h2 class="panel-title">{{slug}}</h2>
+                    <h2 class="panel-title">{{@key}}</h2>
                 </div>
                 <div class="panel-body">
                     <table>
                         <tbody>
-                        {{#each builds}}
-                        <tr>
-                            <th>{{name}}</th>
-                            <td class="status bg-{{status}}">
+                        {{#each reports}}
+                        <tr class="status bg-{{status}}">
+                            <th>
                                 {{#if link}}
                                 <a target="_blank" href="{{link}}">
                                 {{/if}}
-
-                                    {{{description}}}
-
+                                    {{title}}
                                 {{#if link}}
                                 </a>
                                 {{/if}}
+
+                                {{#if name}}
+                                    <br/><small>{{name}}</small>
+                                {{/if}}
+                            </th>
+                            <td>
+                                {{{description}}}
                             </td>
                         </tr>
                         {{/each}}
