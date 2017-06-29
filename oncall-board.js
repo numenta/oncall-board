@@ -25,7 +25,6 @@ var BAMBOO_PLANS = {
         'NUP-NUPDOCS'
       , 'NUP-COREDOCS'
   ]
-  , 'Application Builds': ['TAUR-TAUR']
   , 'Web Builds': [
       'WEB-COM'
     , 'WEB-ORG'
