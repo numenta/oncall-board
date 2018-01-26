@@ -101,9 +101,11 @@ function requestHander(req, res) {
                 request.get(jsonUrl, function(err, response, body) {
                     var payload = undefined;
                     if (err || response.statusCode != 200) {
+                        console.log(err);
+                        console.log(jsonUrl);
                         return errorResponse(
                             new Error(
-                                'Bad response (' + response.statusCode + ') from '
+                                'Bad response (' + err + ') from '
                                 + jsonUrl
                             ), res
                         );
